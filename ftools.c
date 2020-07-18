@@ -121,9 +121,9 @@ static PyObject *ftools_fadvise(PyObject *self, PyObject *args, PyObject *keywds
 
     static char *kwlist[] = {"fd","mode", "offset", "length", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "is|ii", kwlist, 
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "is|ii", kwlist,
                                      &fd, &str_mode, &offset, &length)) {
-        return NULL; 
+        return NULL;
     }
 
     int mode = -1;
@@ -142,9 +142,9 @@ static PyObject *ftools_fadvise(PyObject *self, PyObject *args, PyObject *keywds
         mode = POSIX_FADV_NOREUSE;
     } else {
        if( (asprintf(&errstr, "%s is an invalid mode", str_mode)) == -1)
-        {   
+        {
             return PyErr_NoMemory();
-        } 
+        }
         PyErr_SetString(PyExc_TypeError, errstr);
         return NULL;
     }
@@ -178,11 +178,19 @@ static PyObject *ftools_fadvise(PyObject *self, PyObject *args, PyObject *keywds
 static PyMethodDef FtoolsMethods[] = {
     {"fincore", ftools_fincore, METH_VARARGS, "Return the mincore structure for the given file."},
     {"fincore_ratio", ftools_fincore_ratio, METH_VARARGS, "Return a int two tuple indicating file in page cache ratio."},
-    {"fadvise", (PyCFunction) ftools_fadvise, METH_KEYWORDS, "fadvise system call for Python!"},
+    {"fadvise", (PyCFunction) ftools_fadvise, METH_VARARGS | METH_KEYWORDS, "fadvise system call for Python!"},
     {NULL, NULL, 0, NULL}
 };
 
-PyMODINIT_FUNC initftools(void) {
-    (void)Py_InitModule("ftools", FtoolsMethods);
+static struct PyModuleDef FtoolsModule = {
+    PyModuleDef_HEAD_INIT,
+    "ftools",
+    NULL,
+    -1,
+    FtoolsMethods
+};
 
+PyMODINIT_FUNC PyInit_ftools(void)
+{
+    return PyModule_Create(&FtoolsModule);
 }
